@@ -1,102 +1,91 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/bolliyaswanth/pitron/main/assets/pitron-banner.png" alt="PiTron Banner" width="100%" />
 
-  <h1>⚡ PiTron</h1>
-  <h3>Browser-Native Synchrotron Digital Twin · Relativistic Physics · WebGPU-Ready Architecture</h3>
+
+  <h1>⚡ PiTron  ⚡</h1>
+  <h3> Synchrotron Digital Twin · Relative Physics · WebGL & Wasm Architecture</h3>
 
   <p>
     <img src="https://img.shields.io/badge/Status-Active_Research-success?style=for-the-badge" alt="Status" />
-    <img src="https://img.shields.io/badge/Three.js-r168-black?style=for-the-badge&logo=three.js" alt="Three.js" />
-    <img src="https://img.shields.io/badge/React-18-020617?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
-    <img src="https://img.shields.io/badge/Phase_I-JavaScript_Frenet_Engine-eab308?style=for-the-badge" alt="Phase I" />
-    <img src="https://img.shields.io/badge/Phase_II-C%2B%2B_Wasm_Migration-2563eb?style=for-the-badge&logo=cplusplus" alt="Phase II" />
+  
   </p>
 </div>
 
 ---
 
-## 🔭 Executive Vision
+## 🔬 Project Overview
 
-**PiTron is not a simulation. It is a provocation.**
+PiTron is a browser-native 3D digital twin of a synchrotron particle accelerator. The goal of this research project is to determine if complex, high-energy physics integration loops—typically reserved for desktop frameworks like Geant4—can be accurately modeled and rendered at 60 FPS purely in the browser. 
 
-It asks a single question: *What happens when a data scientist who thinks like an embedded systems engineer builds a particle accelerator in the browser?*
+Inspired by the lattice structure of the LHC, PiTron models the interaction between relativistic protons and magnetic containment fields. Dipoles bend, quadrupoles focus, and RF cavities accelerate. If the user drops the magnetic containment threshold via the UI, the system accurately calculates the resulting orbit decay and visualizes the beam loss in real-time.
 
-The result is a high-fidelity, real-time 3D digital twin of a synchrotron-class accelerator. Inspired by the Large Hadron Collider (LHC), PiTron runs at a locked 60 FPS natively in the browser. Dipole magnets bend. Quadrupoles focus. RF cavities accelerate. Relativistic protons spiral through a rigorous mathematical lattice, and if the magnetic containment field is dropped below critical thresholds, catastrophic beam loss occurs in real-time.
+## ⚙️ System Architecture & Domains
 
-This is computational physics engineered as a production web application. It is a love letter to high-performance computing, written first as a JavaScript prototype, with a paved architectural runway to **C++ and WebAssembly**.
+This project serves as a bridge between my work in embedded hardware, data science, and low-level software architecture.
 
----
+### 📊 Telemetry Pipeline & DAQ
+The frontend React interface acts as a live Data Acquisition (DAQ) system. The physics engine broadcasts state telemetry every 150 milliseconds, aggregating:
+* **Average relativistic momentum** (proxy for beam energy).
+* **Transverse orbit deviations** (metric for beam stability).
 
-## 🧬 The Engineering Crossover
+This streaming pipeline is architected to be headless. The ultimate goal is to pipe this live JSON stream directly into `pandas` and `scikit-learn` to build anomaly detection models that predict beam loss before the containment failure renders on screen.
 
-This project exists at the exact intersection of my core engineering disciplines. I build bridges between hardware realities, data acquisition, and low-level software architecture.
+### 🔌 Embedded Control Abstractions
+Coming from a background in ATmega32 firmware and IoT, I structured the simulation's magnet controls as software abstractions of physical PLC/FPGA actuators. Adjusting the UI sliders directly mutates the state variables in the physics loop. The resulting feedback loop (User Input $\rightarrow$ Power Supply Abstraction $\rightarrow$ Physics Lattice $\rightarrow$ DAQ Telemetry) closely mirrors a real-world industrial SCADA environment.
 
-### 📊 Data Science & Machine Learning (The Telemetry Pipeline)
-The Control Deck is not just a cosmetic UI; it is a live data acquisition (DAQ) system. Every 150 milliseconds, the telemetry pipeline aggregates:
-* Average relativistic beam momentum (proxy for energy)
-* Transverse orbit deviation (metric for beam stability)
+### 🚀 Phase II: The C++ / WebAssembly Migration
+JavaScript handles the Phase I integration loop, but JS garbage collection creates unavoidable bottlenecks at high particle counts. The architecture is currently being migrated to C++ compiled to WebAssembly (Wasm) via Emscripten.
 
-This streaming pipeline is architected for future ingestion into `pandas` DataFrames and `scikit-learn` models. The ultimate goal of this telemetry is **Predictive Maintenance and Beam Loss ML Prediction**—creating a genuine high-energy physics dataset generator running locally on your machine.
-
-### 🔌 Embedded Systems Abstraction (Hardware-in-the-Loop)
-Coming from a background in ATmega32 hardware security and IoT, I designed the accelerator's magnet structures as **software abstractions of physical hardware actuators**. 
-When you adjust the "Dipole Field Strength" slider, you are operating a simulated PLC/FPGA-based magnet power supply controller. The feedback loop—*User Input → Power Supply Abstraction → Physics Lattice → Telemetry Sensor → HUD*—perfectly mirrors an industrial SCADA environment.
-
-### ⚙️ C++ & WebAssembly (The Phase II Migration)
-JavaScript is the prototype. **C++ is the production engine.**
-Phase I validates the Frenet-Serret coordinate system, the FODO lattice configuration, and the WebGL rendering pipeline. Phase II transitions the mathematical core to **C++ compiled to WebAssembly via Emscripten**.
-
-The architecture is already pre-optimized for this transition:
-* **Zero-Copy Memory:** The JS frontend and C++ backend will share a single contiguous `ArrayBuffer` (`std::vector<BunchState>`), eliminating serialization overhead.
-* **Strict Pointer Management:** The interface contract is a single `getWorldPos()` function, designed to map exactly to a Wasm memory export.
-* **Cache-Friendly Execution:** Designed for SIMD loops and explicit RK2 sub-step integrators to handle millions of relativistic particle vectors simultaneously.
+This migration unlocks:
+* **Zero-Copy Memory:** The JS frontend will read directly from a shared `ArrayBuffer` (`std::vector<BunchState>`) populated by the C++ backend, eliminating serialization overhead.
+* **SIMD Acceleration:** Utilizing C++ vectors to parallelize the Lorentz force calculations for millions of particles.
+* **Deterministic Memory Management:** Bypassing JS garbage collection for stable frame rates.
 
 ---
 
-## 📐 Core Physics Architecture
+## 📐 Mathematical Implementation
 
-PiTron completely decouples the physics integration loop from the rendering engine. The simulation relies on rigorous mathematical models rather than basic collision boxes.
+The engine strictly decouples physics calculations from the WebGL rendering loop. 
 
-### The Frenet–Serret Coordinate System
-The accelerator is an LHC-style octagon comprising 8 straight insertion sectors (for RF cavities) and 8 curved arcs (dipole bending sectors). Particle coordinates are mapped using an unwrapped 1D path:
-* $s$: Longitudinal distance along the design orbit.
-* $x, y$: Transverse horizontal and vertical deviations.
+### The Frenet–Serret Framework
+The accelerator is modeled as an octagonal lattice comprising straight insertion sectors and curved bending arcs. Trajectories are unwrapped into a 1D coordinate path:
+* $s$: Longitudinal position along the design orbit.
+* $x, y$: Transverse deviations from the ideal path.
 
-### 3D Relativistic Lorentz Force Equation
-Every frame, each proton bunch calculates its trajectory based on the vector formulation of the Lorentz force:
+### Lorentz Force Integration
+Particle states are updated via a discretized integration of the 3D Lorentz force equation:
 
 $$\frac{d\vec{p}}{dt} = q(\vec{E} + \vec{v} \times \vec{B})$$
 
-* **Dipole Magnets:** Apply a vertical magnetic field $B_y$ to enforce the design curvature ($p = qBR$).
-* **Quadrupole Magnets:** Apply position-dependent transverse forces ($F_x \propto -x$, $F_y \propto +y$) creating an Alternating Gradient (FODO) focusing lattice.
-* **RF Cavities:** Apply longitudinal energy kicks: $\Delta E = q V_{rf} \sin(\phi_s)$.
+* **Dipoles:** Apply vertical magnetic fields to maintain curvature ($p = qBR$).
+* **Quadrupoles:** Apply position-dependent focusing gradients ($F_x \propto -x$, $F_y \propto +y$), generating a FODO lattice structure.
+* **RF Cavities:** Apply longitudinal momentum kicks via sinusoidal voltage phases.
 
 ---
 
-## 🎨 Visual Fidelity & WebGL
+## 🎨 Render Pipeline
 
-PiTron targets AAA-quality scientific visualization, heavily inspired by modern game engine rendering techniques:
-* **Post-Processing Bloom:** Utilizes `@react-three/postprocessing` to ensure particle beams genuinely glow against the dark vacuum chamber.
-* **Vector Alignment:** Instanced meshes elongate and orient dynamically along their 3D velocity vectors to represent relativistic beam streaks.
-* **Additive Blending:** The vacuum tube utilizes a custom transparent, double-sided glass-morphism material to allow full visibility of the containment field.
+PiTron leverages `Three.js` and `@react-three/fiber` to offload rendering to WebGL/WebGPU:
+* **Post-Processing:** Uses `@react-three/postprocessing` Bloom passes to visualize relativistic energy thresholds.
+* **Vector Alignment:** Instanced meshes dynamically calculate quaternions to orient themselves along their current 3D velocity vector.
+* **Material Shaders:** The vacuum chamber utilizes additive blending and depth-write overrides to render the magnetic containment field without obscuring the particle instances.
 
 ---
 
-## 🚀 Local Development Setup
+## 💻 Local Execution
 
-No GPU required—runs efficiently on standard integrated graphics.
+The engine is highly optimized and runs entirely on client-side compute. No dedicated GPU is required.
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone [https://github.com/bolliyaswanth/pitron.git](https://github.com/bolliyaswanth/pitron.git)
 
-# Navigate into the project
+# 2. Navigate to the directory
 cd pitron
 
-# Install dependencies
+# 3. Install Node dependencies
 npm install
 
-# Start the Vite development server
+# 4. Spin up the Vite development server
 npm run dev
 
-# Application will run on http://localhost:5173
+# 5. Access the control deck at http://localhost:5173
